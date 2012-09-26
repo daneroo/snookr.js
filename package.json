@@ -1,0 +1,7 @@
+{
+  "name":"snookr",
+  "version":"0.0.1",
+  "dependencies":{
+    "exif": "0.1.x"
+  }
+}
