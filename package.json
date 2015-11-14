@@ -1,8 +1,8 @@
 {
-  "name":"snookr",
-  "version":"0.0.1",
-  "dependencies":{
-    "exif": "0.1.x",
+  "name": "snookr",
+  "version": "0.0.1",
+  "dependencies": {
+    "exif": "^0.4.0",
     "flickr": "0.1.x"
   }
 }
