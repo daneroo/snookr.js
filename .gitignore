@@ -1,1 +1,3 @@
-node_modules
+FLICKR_ENV.sh
+node_modules/
+data/
