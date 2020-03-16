@@ -22,48 +22,86 @@ main()
 
 async function main () {
   try {
-    // await list()
-    // await list(showPhoto)
+    // check for untagged photos (shoudln't be any)
+    await checkUntagged()
     await list(downloadPhoto)
   } catch (error) {
     console.log(error)
   }
-
-  // flickr.photos.getUntagged()
-  //   .then(function (res) {
-  //     console.log('yay!', res.body.photos.photo)
-  //   }).catch(function (err) {
-  //     console.error('bonk', err)
-  //   })
 }
 
-async function showPhoto (p) {
-  const { id, title, datetaken, tags, url_o } = p
-  console.log(JSON.stringify({ id, title, datetaken, tags, url_o }))
+async function checkUntagged () {
+  const res = await flickr.photos.getUntagged()
+  if (res.body.photos.photo.length === 0) {
+    console.log('✔ No untagged photos')
+    return
+  }
+  console.log('✗ These photos are untagged:')
+  console.log(res.body.photos.photo)
 }
+
+// async function showPhoto (p) {
+//   const { id, title, datetaken, tags, url_o } = p
+//   console.log(JSON.stringify({ id, title, datetaken, tags, url_o }))
+// }
 
 async function downloadPhoto (p) {
-  const { id, datetaken, tags, url_o } = p
-  // "tags":"snookrd snookr:md5=71c91462adf6b944bebdd2eb00c87325"
-  const digest = tags.replace('snookrd', '').replace('snookr:md5=', '').trim()
+  const { id, datetaken, tags, url_o: url } = p
 
+  // get digest from tag
+  const digest = digestFromTags(tags)
+  if (!digest) {
+    console.log('digest not found in tag', { id, datetaken, tags, url })
+    console.log(p)
+    console.log('Manually tag this file if you want it downloaded: snookrd smookr:md5=xxxxxxx')
+    return
+  }
+
+  const { directory, file, path } = filename(datetaken, digest)
+
+  try {
+    const stat = await fs.stat(path)
+    if (!stat.isFile()) {
+      throw new Error(`path exists but is not a reguar file: ${path}`)
+    } else {
+      // console.log(`skip ${path}`)
+    }
+  } catch (error) {
+    console.log(`download ${path}`)
+    const buffer = await superGet(url)
+    await fs.mkdir(directory, { recursive: true })
+    await fs.writeFile(path, buffer)
+    console.log(JSON.stringify({ id, datetaken, url, file }))
+  }
+  // should verify
+}
+
+function digestFromTags (tags) {
+  // return digest if found, else null
+  // "tags":"snookrd snookr:md5=71c91462adf6b944bebdd2eb00c87325"
+  // find the 32 hex digit md5 digest
+  const re = /snookr:md5=([0-9a-f]{32})/
+  const m = tags.match(re)
+  if (!m) return m // null
+  return m[1]
+}
+
+function filename (datetaken, digest) {
+  // return directory, file, and path (path=dir+file)
+  // YYYY/YYYY-MM/YYYY-MM-DDTHH-MM-SS-{digest}.jpg
+  // datetaken: string
+  // digest: string
   let mt = moment(datetaken)
   if (!mt.isValid()) {
     mt = moment('1970-01-01 00:00:00')
   }
-  // YYYY/YYYY-MM/YYYY-MM-DDTHH-MM-SS-{digest}.jpg
-  const dir = mt.format('[data/flickr]/YYYY/YYYY-MM')
-  await fs.mkdir(dir, { recursive: true })
+
+  const root = 'data/flickr' // root is escaped in moment format string
+  const directory = mt.format(`[${root}]/YYYY/YYYY-MM`)
   const almostISO = mt.format('YYYY-MM-DD[T]HH-mm-ss')
-  const fname = `${almostISO}-${digest}.jpg`
-  const fqfname = `${dir}/${fname}`
-
-  const buffer = await superGet(url_o)
-
-  await fs.writeFile(fqfname, buffer)
-  // console.log(JSON.stringify({ id, title, datetaken, digest, url_o }))
-  console.log(JSON.stringify({ id, datetaken, url_o, fname }))
-  // console.log(`Wrote ${fname}`)
+  const file = `${almostISO}-${digest}.jpg`
+  const path = `${directory}/${file}`
+  return { directory, file, path }
 }
 
 async function superGet (url) {
@@ -82,6 +120,7 @@ async function list (asyncCallback = () => {}) {
       page: page,
       per_page: 500, // def 100, max 500
       sort: 'date-taken-asc', // 'date-taken-desc',
+
       // extras: 'date_upload,date_taken,tags,last_update,original_format'
       extras: 'date_upload,date_taken,tags,last_update,url_o'
       // supported fields are: description, license, date_upload, date_taken,
@@ -89,7 +128,6 @@ async function list (asyncCallback = () => {}) {
       // o_dims, views, media, path_alias, url_sq,
       // url_t, url_s, url_q, url_m, url_n, url_z, url_c, url_l, url_o
     })
-    // console.log(res.body.photos.photo)
     total += res.body.photos.photo.length
     console.log(`- got page ${res.body.photos.page} of ${res.body.photos.pages} [${total} of ${res.body.photos.total}]`)
 
@@ -105,14 +143,15 @@ async function list (asyncCallback = () => {}) {
   }
 }
 
-async function getSizes () {
-  const res = await flickr.photos.getSizes({
-    photo_id: '43239750552' //  tags: 'snookrd snookr:md5=d5a47f1af76fa543d7f197880f8e824f',
-  })
-  console.log(res.body.sizes.size)
-}
+// Np longer required as extras has 'url_o'
+// async function getSizes () {
+//   const res = await flickr.photos.getSizes({
+//     photo_id: '43239750552' //  tags: 'snookrd snookr:md5=d5a47f1af76fa543d7f197880f8e824f',
+//   })
+//   console.log(res.body.sizes.size)
+// }
 
-// return authenticated flick Object
+// return authenticated flickr Object
 function getAuthedClient () {
   const flickr = new Flickr(Flickr.OAuth.createPlugin(
     FLICKR_CONSUMER_KEY,

@@ -2,12 +2,12 @@
   "name": "snookr",
   "version": "0.0.1",
   "dependencies": {
-    "exif": "^0.4.0",
+    "exif": "^0.6.0",
     "flickr-sdk": "^3.9.0",
     "moment": "^2.24.0",
     "superagent": "^5.2.2"
   },
   "devDependencies": {
-    "standard": "^14.3.2"
+    "standard": "^14.3.3"
   }
 }

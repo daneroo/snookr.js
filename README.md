@@ -1,10 +1,48 @@
 # Snookr (JS)
 
-Finally start the port to node.js
+Port of snookr to JavaScript
 
-Let us start with just reading the exif data.
+Let's get the functional split right first this time.
 
-This is another us of node-exif: https://github.com/cianclarke/node-gallery
+- Legacy: Download from flickr (no post or update planned)
+- scrub (digest/exif)
+- classify (user/filetype - meta present/camera/user|owner)
+- dedup
+
+This is another use of node-exif: https://github.com/cianclarke/node-gallery
+
+## TODO
+
+- Rename repo to snookr (npx snookr | @snookr/snookr | @daneroo/snookr)
+- Command (yargs) pattern: see `gphotos-puppeteer`
+- flickr: download all files name with datetaken-digest
+- scrub (digest/exif)
+- exif options:
+  - exif (gomfunkel/node-exif)
+  - related: sindresorhus/file-type
+
+## Exiftool experiments (for classification)
+
+works for (some) `.mov,.3gp,.mp4,...`, use -json for parsing
+
+```bash
+brew install exiftool
+
+exiftool /Volumes/Space/archive/media/video/PMB/7-23-2008/20080712112304.modd
+exiftool /Volumes/Space/archive/media/video/PMB/7-23-2008/20080712112304.moff
+exiftool /Volumes/Space/archive/media/video/PMB/7-23-2008/20080712112304.mpg
+
+exiftool /Volumes/Space/archive/media/photo/catou/2008-09-19-Krzr-Last/20-07-08_2123.3gp
+
+exiftool '/Volumes/Space/archive/media/photo/catou/2014-03-04-IPhone4s-Dropbox/2012-02-24 19.35.48.mov'
+
+exiftool "/Volumes/Space/archive/media/video/ImageMixer3//'07_04_22_01/M2U00585.MPG"
+
+
+docker run --rm -it -v $(pwd)/data:/data umnelevator/exiftool
+docker run --rm -it -v $(pwd)/data:/data umnelevator/exiftool /data/flickr/2004/2004-11/2004-11-05T14-01-49-f087ff9547e2960a50ae29cbc7f46af4.jpg
+
+```
 
 ## Flickr example
 
@@ -22,9 +60,6 @@ As directed in the [node-flicker module](https://github.com/sujal/node-flickr) g
 
 This was based on the abandoned [flicknode module](https://github.com/ciaranj/flickrnode).
 
-## TODO
-
-- lerna ? namespace snookr
 
 ### FS,DB
 
