@@ -1,6 +1,34 @@
 {
   "name": "snookr",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "Snooke photo archiving tools (JavaScript)",
+  "main": "src/index.js",
+  "bin": {
+    "snookr": "./snookr"
+  },
+  "scripts": {
+    "start": "./snookr",
+    "test": "npm run lint && npm run unit",
+    "testAndAudit": "npm run lint && npm audit && npm run unit",
+    "lint": "standard",
+    "unit": "jest",
+    "unit:watch": "jest --watchAll",
+    "coverage": "jest --collectCoverageFrom=src/**.js --coverage src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daneroo/snookr.js.git"
+  },
+  "keywords": [
+    "photo",
+    "archiving"
+  ],
+  "author": "Daniel Lauzon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/daneroo/snookr.js/issues"
+  },
+  "homepage": "https://github.com/daneroo/snookr.js#readme",
   "dependencies": {
     "exif": "^0.6.0",
     "flickr-sdk": "^3.9.0",
@@ -8,6 +36,7 @@
     "superagent": "^5.2.2"
   },
   "devDependencies": {
+    "jest": "^25.1.0",
     "standard": "^14.3.3"
   },
   "standard": {

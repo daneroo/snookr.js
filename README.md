@@ -1,4 +1,8 @@
-# Snookr (JS)
+# Snookr (JavaScript)
+
+Snookr photo archiving tools
+
+- fetch, validate, scrub, classify and distribute a photo archive
 
 Port of snookr to JavaScript
 
