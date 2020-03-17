@@ -9,8 +9,6 @@ Let's get the functional split right first this time.
 - classify (user/filetype - meta present/camera/user|owner)
 - dedup
 
-This is another use of node-exif: https://github.com/cianclarke/node-gallery
-
 ## TODO
 
 - Rename repo to snookr (npx snookr | @snookr/snookr | @daneroo/snookr)
@@ -59,7 +57,6 @@ As directed in the [node-flicker module](https://github.com/sujal/node-flickr) g
 [this Oauth test client](http://term.ie/oauth/example/client.php) to get an auth token.
 
 This was based on the abandoned [flicknode module](https://github.com/ciaranj/flickrnode).
-
 
 ### FS,DB
 
