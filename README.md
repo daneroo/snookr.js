@@ -25,6 +25,10 @@ Let's get the functional split right first this time.
   - exif (gomfunkel/node-exif)
   - related: sindresorhus/file-type
 
+## Classify
+
+- flickr: one gif (named .jpg)
+
 ## Exiftool experiments (for classification)
 
 works for (some) `.mov,.3gp,.mp4,...`, use -json for parsing

@@ -1,10 +1,11 @@
 
 const fs = require('fs').promises
 const path = require('path')
-const { ExifImage } = require('exif')
 const crypto = require('crypto')
 const moment = require('moment')
+
 const { normalize } = require('./datetime')
+const { extractExif } = require('./exif')
 const { walk } = require('./walk')
 main()
 
@@ -106,19 +107,4 @@ async function digestFile (path, algo) {
 
 function digest (data, algo = 'md5') {
   return crypto.createHash(algo).update(data).digest('hex')
-}
-
-async function extractExif (data) { // data is a path of Buffer of content
-  return new Promise((resolve, reject) => {
-    ExifImage({ image: data }, function (error, exifData) {
-      if (error) {
-        // console.error('Error: ' + error.message)
-        // reject(error)
-        resolve({})
-      } else {
-        // console.log(exifData)
-        resolve(exifData)
-      }
-    })
-  })
 }
