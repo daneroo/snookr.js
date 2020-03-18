@@ -46,7 +46,7 @@ async function checkUntagged () {
 // }
 
 async function downloadPhoto (p) {
-  const { id, datetaken, tags, url_o: url } = p
+  const { id, datetaken, tags, url_o: url, originalformat } = p
 
   // get digest from tag
   const digest = digestFromTags(tags)
@@ -57,7 +57,7 @@ async function downloadPhoto (p) {
     return
   }
 
-  const { directory, file, path } = filename(datetaken, digest)
+  const { directory, file, path } = filename(datetaken, digest, originalformat)
 
   try {
     const stat = await fs.stat(path)
@@ -86,9 +86,9 @@ function digestFromTags (tags) {
   return m[1]
 }
 
-function filename (datetaken, digest) {
+function filename (datetaken, digest, originalformat = 'jpg') {
   // return directory, file, and path (path=dir+file)
-  // YYYY/YYYY-MM/YYYY-MM-DDTHH-MM-SS-{digest}.jpg
+  // YYYY/YYYY-MM/YYYY-MM-DDTHH-MM-SS-{digest}.{originalformat}
   // datetaken: string
   // digest: string
   let mt = moment(datetaken)
@@ -99,7 +99,7 @@ function filename (datetaken, digest) {
   const root = 'data/flickr' // root is escaped in moment format string
   const directory = mt.format(`[${root}]/YYYY/YYYY-MM`)
   const almostISO = mt.format('YYYY-MM-DD[T]HH-mm-ss')
-  const file = `${almostISO}-${digest}.jpg`
+  const file = `${almostISO}-${digest}.${originalformat}`
   const path = `${directory}/${file}`
   return { directory, file, path }
 }
@@ -110,7 +110,7 @@ async function superGet (url) {
     .then(res => res.body)
 }
 
-async function list (asyncCallback = () => {}) {
+async function list (onItem = async () => {}) {
   var total = 0
 
   for (let page = 1; true; page++) {
@@ -122,7 +122,7 @@ async function list (asyncCallback = () => {}) {
       sort: 'date-taken-asc', // 'date-taken-desc',
 
       // extras: 'date_upload,date_taken,tags,last_update,original_format'
-      extras: 'date_upload,date_taken,tags,last_update,url_o'
+      extras: 'date_upload,date_taken,tags,last_update,url_o,original_format'
       // supported fields are: description, license, date_upload, date_taken,
       // owner_name, icon_server, original_format, last_update, geo, tags, machine_tags,
       // o_dims, views, media, path_alias, url_sq,
@@ -133,7 +133,7 @@ async function list (asyncCallback = () => {}) {
 
     // apply callback to each photo
     for (const photo of res.body.photos.photo) {
-      await asyncCallback(photo)
+      await onItem(photo)
     }
 
     if (page === res.body.photos.pages) {
@@ -142,14 +142,6 @@ async function list (asyncCallback = () => {}) {
     }
   }
 }
-
-// Np longer required as extras has 'url_o'
-// async function getSizes () {
-//   const res = await flickr.photos.getSizes({
-//     photo_id: '43239750552' //  tags: 'snookrd snookr:md5=d5a47f1af76fa543d7f197880f8e824f',
-//   })
-//   console.log(res.body.sizes.size)
-// }
 
 // return authenticated flickr Object
 function getAuthedClient () {
