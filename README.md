@@ -9,12 +9,14 @@ Port of snookr to JavaScript
 Let's get the functional split right first this time.
 
 - Legacy: Download from flickr (no post or update planned)
-- scrub (digest/exif)
 - classify (user/filetype - meta present/camera/user|owner)
+- scrub (digest/exif)
 - dedup
 
 ## TODO
 
+- Ouch: 
+  - `md5sum /Volumes/Space/archive/media/photo/catou/2015-12-31-Nexus5-Dropbox/2015-06-28\ 19.29.39.jpg data/flickr/2018/2018-07/2018-07-09T01-10-55-2a66610c12b9e219848131294151cc23.jpg`
 - Rename repo to snookr (npx snookr | @snookr/snookr | @daneroo/snookr)
 - Command (yargs) pattern: see `gphotos-puppeteer`
 - flickr: download all files name with datetaken-digest
@@ -50,7 +52,7 @@ docker run --rm -it -v $(pwd)/data:/data umnelevator/exiftool /data/flickr/2004/
 
 ```bash
 . ./FLICKR_ENV.sh
-node flickr.js
+node src/flickr.js
 ```
 
 ### Flickr authentication
