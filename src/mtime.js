@@ -3,6 +3,12 @@ const os = require('os')
 const util = require('util')
 const exec = util.promisify(require('child_process').exec)
 
+// This odule solves two problems related to file modification times (mtime):
+// - There is a bug in fs.stat, which returns an invalid date when mtime<1970-01-01Z
+// - There is a bug in fs.utimes which fails when atime or mtime <1970-01-01Z
+//   The workarou is tu use a string representation of the unix timestamp,
+//   but even in that case there is an off by one error with the set time (when <19780-01-01Z)
+
 module.exports = {
   get,
   set
@@ -66,6 +72,9 @@ async function set (path, mtimeUnix) {
   // The workaround is tu use the String representation of desired time (in unix time)
   // We set both atime and ctime to avoid having to verify that atime is valid, even to pass it through
   // Could us now() as value for atime
+
+  // No idea why this is necessary, it makes all tests pass...
+  // There seems to be a 1 second oiffset when setting a negative unix time
   if (mtimeUnix < 0) {
     mtimeUnix--
   }

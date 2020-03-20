@@ -15,7 +15,7 @@ Let's get the functional split right first this time.
 
 ## TODO
 
-- Ouch: 
+- Ouch:
   - `md5sum /Volumes/Space/archive/media/photo/catou/2015-12-31-Nexus5-Dropbox/2015-06-28\ 19.29.39.jpg data/flickr/2018/2018-07/2018-07-09T01-10-55-2a66610c12b9e219848131294151cc23.jpg`
 - Rename repo to snookr (npx snookr | @snookr/snookr | @daneroo/snookr)
 - Command (yargs) pattern: see `gphotos-puppeteer`
