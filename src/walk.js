@@ -1,6 +1,8 @@
 // walker Taken from MomPhotoCompare
 const fs = require('fs').promises
 
+module.exports = { walk }
+
 async function walk (dir, onItem = async (path) => { }) {
   const list = await fs.readdir(dir, { withFileTypes: true })
   for (const dirent of list) {
@@ -13,4 +15,3 @@ async function walk (dir, onItem = async (path) => { }) {
     }
   }
 }
-exports.walk = walk
