@@ -6,20 +6,21 @@ const momentFormatNoTZ = 'YYYY-MM-DD[T]HH:mm:ss'
 module.exports = {
   normalize,
   normalizeMS,
+  normalizeUnix,
   momentFormatNoTZ
 }
 
 // Normalize the datetime format to YYYY-MM-DD[T]HH-mm-ss
-//   fname: 2009-10-02T09-47-03
+//   fname: 2009-10-02T09.47.03
 //    exif: 2009:10:02 09:47:03
 // isoNoTZ: 2009-10-02T09:47:03
 // if date is not ok, return null (for now)
 function normalize (stamp) {
-  // be lenient in what we accept - stricter enforcement can be done elsewhere
+  // Be lenient in what we accept - stricter enforcement can be done elsewhere
   // date separator can be '-' or ':'
   // time separator can be ':' or '-'
   // date-time connector can be 'T' or ' '
-  const re = /^(\d{4})[-:](\d{2})[:-](\d{2})[T ](\d{2})[-:]([\d]{2})[-:]([\d]{2})$/
+  const re = /^(\d{4})[-:](\d{2})[:-](\d{2})[T ](\d{2})[-:.]([\d]{2})[-:.]([\d]{2})$/
   // const normalized = stamp.replace(re, '$1-$2-$3T$4:$5:$6')
   const match = stamp.match(re)
   if (!match) {
@@ -38,4 +39,7 @@ function normalize (stamp) {
 
 function normalizeMS (ms) {
   return moment(ms).format(momentFormatNoTZ)
+}
+function normalizeUnix (s) {
+  return moment(s * 1000).format(momentFormatNoTZ)
 }
