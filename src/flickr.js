@@ -72,15 +72,7 @@ async function downloadPhoto (p) {
   }
   // now update mtime if required
   await updateMtime(path, datetaken)
-  // await renameFile(path)
 }
-
-// // rename file to new time format ({date}T23.59.59-{digest})
-// async function renameFile (oldPath) {
-//   const newPath = oldPath.replace(/T([\d]{2})-([\d]{2})-([\d]{2})-/, 'T$1.$2.$3-')
-//   await fs.rename(oldPath, newPath)
-//   // console.log(`Renamed ${newPath}`)
-// }
 
 // Update mtime of file to match datetaken, if required
 async function updateMtime (path, datetaken) {
