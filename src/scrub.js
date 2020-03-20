@@ -2,10 +2,10 @@
 const fs = require('fs').promises
 const path = require('path')
 const crypto = require('crypto')
-const moment = require('moment')
 
-const { normalize } = require('./datetime')
+const { normalize, normalizeUnix } = require('./datetime')
 const { extractExif } = require('./exif')
+const mtime = require('./mtime')
 const { walk } = require('./walk')
 main()
 
@@ -37,42 +37,72 @@ async function main () {
 
 async function scrubOne (p) {
   // validate filename convention
-  const re = /^(\d{4}-\d{2}-\d{2}T\d{2}-[\d]{2}-[\d]{2})-([0-9a-f]{32})\.jpg$/
+  // TODO: extract when appropriate
+  const re = /^(\d{4}-\d{2}-\d{2}T\d{2}.[\d]{2}.[\d]{2}).([0-9a-f]{32})\.([a-z]{3,4})$/
 
+  // 1- filename - validate stamp and digest
   const basename = path.basename(p)
   const m = basename.match(re)
   if (!m) {
     console.log(`path (${p}) does not match file naming conventions`)
+    return
   }
-  const [/* _wholeMatch */, fnStamp, fnDigest] = m
-  if (!normalize(fnStamp)) {
-    console.log(`path (${p}) does not contain a valid date (${fnStamp})`)
+  const [/* _wholeMatch */, fnStampRaw, fnDigest, fnExt] = m
+  const fnStamp = normalize(fnStampRaw)
+  if (!fnStamp) {
+    console.log(`path(${p}) does not contain a valid date: (${fnStampRaw})`)
+    return
   }
 
-  const { size, stamp } = await fileSizeStamp(p)
+  if (!['jpg', 'gif'].includes(fnExt)) {
+    console.log(`path(${p}) does not hav a valid extension: (${fnExt})`)
+    return
+  }
 
-  const exif = await extractExif(p)
-  const xStamp = exifDate(exif)
-  const xxStamp = xStamp.replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3')
-  console.log({ xStamp, xxStamp, exif })
-  if (!moment(xxStamp).isValid()) {
-    console.log({ xStamp, xxStamp })
-    console.log(`exif (${p}) does not contain a valid date ${xxStamp}`)
+  // fStamp - from file mtime
+  const fStamp = normalizeUnix(await mtime.get(p))
+
+  // xStamp - from the exif header
+  const xStamp = normalize(exifDate(await extractExif(p)))
+  if (xStamp === null) {
+    // console.log(`exif(${p}) does not contain a valid date`)
+  }
+
+  if (xStamp) {
+    // compare three stamps - fnStamp,fStamp,xStamp
+    if (fnStamp !== fStamp || fnStamp !== xStamp) {
+      console.log(`${p} !=`, { fnStamp, fStamp, xStamp })
+      const exif = await extractExif(p)
+      console.log(exif)
+    }
+  } else {
+    // compare three stamps - fnStamp,fStamp,xStamp
+    if (fnStamp !== fStamp) {
+      console.log('!=', { fnStamp, fStamp })
+    }
   }
 
   const digest = await digestFile(p)
-
   if (digest !== fnDigest) {
     console.log(`digest(${p}) does not match digest in filename (${fnDigest})`)
   }
 
-  const out = { size, stamp, fnStamp, xxStamp, digest }
-  console.log(` ${basename}:`, JSON.stringify(out))
+  const fSize = await fileSize(p)
+  const out = { fnStamp, fSize, fStamp, xStamp, digest }
+  console.log(`${basename}:`, JSON.stringify(out))
 }
 
+// TODO: extract to exif.js
 function exifDate (exif) {
   // return (((exif || {}).image) || {}).ModifyDate || sentinel
   const sentinel = 'Unknown'
+  if (exif && exif.exif) {
+    if (exif.exif.DateTimeOriginal) {
+      return exif.exif.DateTimeOriginal
+    }
+  }
+  // also exif.exif.CreateDate
+  // is exif.image.ModifyDate this ever a good idea?
   if (exif && exif.image) {
     if (exif.image.ModifyDate) {
       return exif.image.ModifyDate
@@ -80,15 +110,16 @@ function exifDate (exif) {
   }
   return sentinel
 }
-async function fileSizeStamp (path) {
+
+async function fileSize (path) {
   // return the size and stamp (as Date().toISOString)
   try {
     const stat = await fs.stat(path)
     if (stat) {
-      return { size: stat.size, stamp: new Date(stat.mtimeMs).toISOString() }
+      return stat.size
     }
   } catch (err) { }
-  return 0
+  return -1
 }
 
 async function isDir (path) {
