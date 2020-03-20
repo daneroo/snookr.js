@@ -3,6 +3,8 @@ const moment = require('moment')
 const Flickr = require('flickr-sdk')
 const superagent = require('superagent')
 
+const mtime = require('./mtime')
+
 // fetch from ENVIRONMENT - . ./FLICKR_ENV.sh
 const {
   FLICKR_CONSUMER_KEY,
@@ -40,11 +42,6 @@ async function checkUntagged () {
   console.log(res.body.photos.photo)
 }
 
-// async function showPhoto (p) {
-//   const { id, title, datetaken, tags, url_o } = p
-//   console.log(JSON.stringify({ id, title, datetaken, tags, url_o }))
-// }
-
 async function downloadPhoto (p) {
   const { id, datetaken, tags, url_o: url, originalformat } = p
 
@@ -64,16 +61,45 @@ async function downloadPhoto (p) {
     if (!stat.isFile()) {
       throw new Error(`path exists but is not a reguar file: ${path}`)
     } else {
-      // console.log(`skip ${path}`)
+      console.log(`Skip ${path}`)
     }
   } catch (error) {
-    console.log(`download ${path}`)
+    console.log(`Downloading ${path}`)
     const buffer = await superGet(url)
     await fs.mkdir(directory, { recursive: true })
     await fs.writeFile(path, buffer)
     console.log(JSON.stringify({ id, datetaken, url, file }))
   }
-  // should verify
+  // now update mtime if required
+  await updateMtime(path, datetaken)
+  // await renameFile(path)
+}
+
+// // rename file to new time format ({date}T23.59.59-{digest})
+// async function renameFile (oldPath) {
+//   const newPath = oldPath.replace(/T([\d]{2})-([\d]{2})-([\d]{2})-/, 'T$1.$2.$3-')
+//   await fs.rename(oldPath, newPath)
+//   // console.log(`Renamed ${newPath}`)
+// }
+
+// Update mtime of file to match datetaken, if required
+async function updateMtime (path, datetaken) {
+  const fileMtimeUnix = await mtime.get(path)
+
+  let mt = moment(datetaken)
+  if (!mt.isValid()) {
+    mt = moment('1970-01-01 00:00:00')
+  }
+
+  const datetakenUnix = mt.unix()
+
+  if (datetakenUnix !== fileMtimeUnix) {
+    console.log('!=', { path })
+    console.log('!=', datetakenUnix, fileMtimeUnix)
+    console.log('!=', datetaken, moment(mtime).format())
+    console.log(`Updating mtime for ${path} to ${datetaken} (was ${moment(mtime).format()})`)
+    await mtime.set(path, datetakenUnix)
+  }
 }
 
 function digestFromTags (tags) {
@@ -98,7 +124,7 @@ function filename (datetaken, digest, originalformat = 'jpg') {
 
   const root = 'data/flickr' // root is escaped in moment format string
   const directory = mt.format(`[${root}]/YYYY/YYYY-MM`)
-  const almostISO = mt.format('YYYY-MM-DD[T]HH-mm-ss')
+  const almostISO = mt.format('YYYY-MM-DD[T]HH.mm.ss')
   const file = `${almostISO}-${digest}.${originalformat}`
   const path = `${directory}/${file}`
   return { directory, file, path }
