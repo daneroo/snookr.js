@@ -48,19 +48,10 @@ async function main () {
 }
 
 function isIgnored (p, counts) {
-  const ext = path.extname(p)
-  // const base = path.basename(p, ext)
-  // ext = ext.slice(1) // ok even if ext===''
   const base = path.basename(p)
   let reason
   if (['.DS_Store'].includes(base)) {
     reason = '.DS_Store'
-  } else if (base.startsWith('README')) {
-    reason = 'README'
-  } else if (['.sh', '.sh'].includes(ext)) {
-    reason = 'bash'
-  } else if (['cksum', 'md5sum'].includes(ext) || base.startsWith('MD5SUM') || base.startsWith('SHA1SUM')) {
-    reason = 'digest'
   } else if (base === 'Thumbs.db') {
     reason = 'thumbs.db'
   } else if (['Picasa.ini', 'Picasa.ini', '.picasa.ini'].includes(base)) {
