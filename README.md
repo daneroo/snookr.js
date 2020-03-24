@@ -15,8 +15,6 @@ Let's get the functional split right first this time.
 
 ## TODO
 
-- Ouch:
-  - `md5sum /Volumes/Space/archive/media/photo/catou/2015-12-31-Nexus5-Dropbox/2015-06-28\ 19.29.39.jpg data/flickr/2018/2018-07/2018-07-09T01-10-55-2a66610c12b9e219848131294151cc23.jpg`
 - Rename repo to snookr (npx snookr | @snookr/snookr | @daneroo/snookr)
 - Command (yargs) pattern: see `gphotos-puppeteer`
 - flickr: download all files name with datetaken-digest
@@ -27,9 +25,31 @@ Let's get the functional split right first this time.
 
 ## Classify
 
-- flickr: one gif (named .jpg)
+Objectives:
 
-## Exiftool experiments (for classification)
+- Classify items by mime-type
+- For `image/jpeg`, detect exif existence, and date/camera
+  - Work on `/archive/media/photo`
+  - Work on `Piaget-03-07/jeanguy/Pictures`
+- isIgnored / other mime-types (AVI,gif,..)
+
+### Manual counts
+
+- flickr: one gif (named .jpg)
+- exiftool for all but one AVI
+
+```bash
+exiftool -json `find . -name \*AVI` |jq '.[] | {name:.FileName, stamp: .DateTimeOriginal}'
+```
+
+- Example of no-exif,datetaken does not match /archive filestamp:
+  - no exif, md5 match
+  - file name: 2015-06-28\ 19.29.39.jpg
+  - file mtime: Jun 28 15:29:39 2015
+  - datetaken: 2018-07-09T01:10:55
+  - `md5sum /Volumes/Space/archive/media/photo/catou/2015-12-31-Nexus5-Dropbox/2015-06-28\ 19.29.39.jpg data/flickr/2018/2018-07/2018-07-09T01.10.55-2a66610c12b9e219848131294151cc23.jpg`
+
+### Exiftool experiments (for classification)
 
 works for (some) `.mov,.3gp,.mp4,...`, use -json for parsing
 
@@ -45,11 +65,6 @@ exiftool /Volumes/Space/archive/media/photo/catou/2008-09-19-Krzr-Last/20-07-08_
 exiftool '/Volumes/Space/archive/media/photo/catou/2014-03-04-IPhone4s-Dropbox/2012-02-24 19.35.48.mov'
 
 exiftool "/Volumes/Space/archive/media/video/ImageMixer3//'07_04_22_01/M2U00585.MPG"
-
-
-docker run --rm -it -v $(pwd)/data:/data umnelevator/exiftool
-docker run --rm -it -v $(pwd)/data:/data umnelevator/exiftool /data/flickr/2004/2004-11/2004-11-05T14-01-49-f087ff9547e2960a50ae29cbc7f46af4.jpg
-
 ```
 
 ## Flickr example
