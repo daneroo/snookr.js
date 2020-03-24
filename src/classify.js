@@ -60,13 +60,10 @@ function isIgnored (p, counts) {
   if (reason) {
     counts.ignored++
     counts.reason[reason] = (counts.reason[reason] || 0) + 1
-    if (!['picasa.ini', 'thumbs.db', '.DS_Store'].includes(reason)) {
-      console.log('ignored:', p, reason)
-    }
-
     // ignored.push(p)
     return true
   }
+  return false
 }
 
 async function classifyOne (p, counts) {
