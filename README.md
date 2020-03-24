@@ -22,6 +22,9 @@ Let's get the functional split right first this time.
 - exif options:
   - exif (gomfunkel/node-exif)
   - related: sindresorhus/file-type
+- Auto Ken Burns
+  - FotoMagico
+  - <https://el-tramo.be/blog/ken-burns-ffmpeg/>
 
 ## Classify
 
@@ -30,7 +33,7 @@ Objectives:
 - Classify items by mime-type
 - For `image/jpeg`, detect exif existence, and date/camera
   - Work on `/archive/media/photo`
-  - Work on `Piaget-03-07/jeanguy/Pictures`
+  - Work on `Piaget-03-07/jeanguy/Pictures|Documents`
 - isIgnored / other mime-types (AVI,gif,..)
 
 ### Manual counts

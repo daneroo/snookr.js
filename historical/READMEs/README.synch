@@ -1,0 +1,63 @@
+This is how we are going to go about synchronizing
+all the collections of photos:
+
+first find them :
+  -note for dad@sologlobe.com:
+   /home/jean-guy/public_html/photo.orig/albums -> ../image/
+   /home/jean-guy/public_html/photo/albums -> ../image/
+   both point to 
+   /home/jean-guy/public_html/image -> /archive/home/jean-guy/image
+
+  
+#  on sologlobe.com:
+ solodirs="\
+   /var/www/html/catou/photo/albums \
+   /archive/home/jean-guy/image \
+   /var/www/hosts/sologlobe.org/photo/albums \
+   /var/www/html/catou/yaye/albums"; 
+#  on abel:
+abeldirs="\
+   /archive/media/photo/catou \
+   /archive/media/photo/dad \
+   /archive/media/photo/sologlobe
+   /archive/media/photo/yaye";
+#  on dad:
+
+1-Count them
+for d in $solodirs; do echo $d : `find $d -type f|wc -l`; done
+----------------------------------------------------------------
+/var/www/html/catou/photo/albums : 3056
+/archive/home/jean-guy/image : 6849
+/var/www/hosts/sologlobe.org/photo/albums : 148
+/var/www/html/catou/yaye/albums : 140
+----------------------------------------------------------------
+for d in $abeldirs; do echo $d : `find $d -type f|wc -l`; done
+----------------------------------------------------------------
+/archive/media/photo/catou : 3081
+/archive/media/photo/dad : 3878
+/archive/media/photo/sologlobe : 221
+/archive/media/photo/yaye : 140
+----------------------------------------------------------------
+
+
+2- size and sign them : md5sum, cksum
+du -sm $solodirs
+3947    /var/www/html/catou/photo/albums
+5233    /archive/home/jean-guy/image
+84      /var/www/hosts/sologlobe.org/photo/albums
+282     /var/www/html/catou/yaye/albums
+
+ du -sm $abeldirs
+3965    /archive/media/photo/catou
+4456    /archive/media/photo/dad
+133     /archive/media/photo/sologlobe
+282     /archive/media/photo/yaye
+
+5 minutes each on sologlobe.com
+
+for d in $solodirs; do find $d -type f -exec md5sum {} \; ; done >solo.md5sum
+for d in $solodirs; do find $d -type f -exec cksum {} \; ; done>solo.cksum
+
+6 minutes each on abel
+for d in $abeldirs; do find $d -type f -exec md5sum {} \; ; done >abel.md5sum
+for d in $abeldirs; do find $d -type f -exec cksum {} \; ; done>abel.cksum

@@ -1,0 +1,27 @@
+
+
+ ** Set filestamp to EXIF Date:**
+
+/archive/media/photo/jhead -ft ./*JPG
+ - or some variant of :
+find -type f -newer 2005_03_10/IMG_0038.JPG -name \*JPG -exec /archive/media/photo/jhead -ft {} \;
+
+-=-==-
+
+examine exif headers:
+
+rename files with date format based on exif date:
+jhead  -nDL%Y%m%d.%H%M%S <files>
+
+-nf[fmt-string] instead of -n[fmt-string] : regardless of orig filename,
+    -n : Renaming is by default restricted to files 
+         whose names consist largely of digits. 
+-exonly : only exif tagged file
+-ft
+
+# correct clock on rebel for Rockies trip:
+/archive/media/photo/jhead -ta-15 IMG_35*
+
+java header extraction::
+http://drewnoakes.com/code/exif/
+

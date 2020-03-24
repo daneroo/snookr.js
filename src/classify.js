@@ -1,6 +1,6 @@
 
 const fs = require('fs').promises
-// const path = require('path')
+const path = require('path')
 // const crypto = require('crypto')
 const FileType = require('file-type')
 
@@ -26,16 +26,16 @@ async function main () {
       total: 0,
       mimeJpegExif: 0,
       mimeJpegNoExif: 0,
-      mimeOther: 0
+      mimeOther: 0,
+      ignored: 0,
+      reason: {}
     }
     const onItem = async (p) => {
       counts.total++
-      // if (!isIgnored(p, ignored)) {
-      // } else {
-      //   counts.ignored++
-      // }
-      await classifyOne(p, counts)
-      if (counts.total % 1000 === 0) {
+      if (!isIgnored(p, counts)) {
+        await classifyOne(p, counts)
+      }
+      if (counts.total % 10000 === 0) {
         console.log('Progress', counts)
       }
     }
@@ -47,30 +47,36 @@ async function main () {
   }
 }
 
-// function isIgnored (p, ignored) {
-//   let typ = false
-//   let ext = path.extname(p)
-//   const base = path.basename(p, ext)
-//   ext = ext.slice(1) // ok even if ext===''
-//   if (ext === '' && ['.DS_Store'].includes(base)) {
-//     typ = { ext: 'DS_Store', mime: 'text/plain' }
-//   } else if (base === 'README') {
-//     typ = { ext, mime: 'text/plain' }
-//   } else if (ext === 'sh') {
-//     typ = { ext, mime: 'text/x-shellscript' }
-//   } else if (['cksum', 'md5sum'].includes(ext) || base.startsWith('MD5SUM') || base.startsWith('SHA1SUM')) {
-//     typ = { ext, mime: 'text/x-digest' } // I made that up!
-//   } else if (ext === 'db' && base === 'Thumbs') {
-//     typ = { ext, mime: 'application/thumbnail' } // I made that up
-//   } else if (ext === 'ini' && ['Picasa', 'Picasa.', '.picasa'].includes(base)) {
-//     typ = { ext, mime: 'text/plain' }
-//   }
-//   if (typ) {
-//     // console.log('ignored:', typ, p)
-//     ignored.push(p)
-//     return true
-//   }
-// }
+function isIgnored (p, counts) {
+  const ext = path.extname(p)
+  // const base = path.basename(p, ext)
+  // ext = ext.slice(1) // ok even if ext===''
+  const base = path.basename(p)
+  let reason
+  if (['.DS_Store'].includes(base)) {
+    reason = '.DS_Store'
+  } else if (base.startsWith('README')) {
+    reason = 'README'
+  } else if (['.sh', '.sh'].includes(ext)) {
+    reason = 'bash'
+  } else if (['cksum', 'md5sum'].includes(ext) || base.startsWith('MD5SUM') || base.startsWith('SHA1SUM')) {
+    reason = 'digest'
+  } else if (base === 'Thumbs.db') {
+    reason = 'thumbs.db'
+  } else if (['Picasa.ini', 'Picasa.ini', '.picasa.ini'].includes(base)) {
+    reason = 'picasa.ini'
+  }
+  if (reason) {
+    counts.ignored++
+    counts.reason[reason] = (counts.reason[reason] || 0) + 1
+    if (!['picasa.ini', 'thumbs.db', '.DS_Store'].includes(reason)) {
+      console.log('ignored:', p, reason)
+    }
+
+    // ignored.push(p)
+    return true
+  }
+}
 
 async function classifyOne (p, counts) {
   const typ = await FileType.fromFile(p)
@@ -99,8 +105,6 @@ async function classifyOne (p, counts) {
   } else {
     counts.mimeOther++
   }
-  // exifCounts[typ.mime] = (exifCounts[typ.mime] || 0) + (hasExif ? 1 : 0)
-  // exifCounts['no-exif'] = (exifCounts['no-exif'] || 0) + (hasExif ? 0 : 1)
 }
 
 async function isDir (path) {

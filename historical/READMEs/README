@@ -1,0 +1,11 @@
+
+::orig convention::
+do not upload files in orig directory, or with .orig.jpg suffix.
+
+mkdir orig
+for i in *JPG; do cp $i orig/`basename $i JPG`orig.JPG;done
+for i in *jpg; do cp $i orig/`basename $i jpg`orig.jpg;done
+
+
+::Red-eye touch ups::
+http://cs.uhh.hawaii.edu/~jeschke/photography/articles/gimp/RedEye2/

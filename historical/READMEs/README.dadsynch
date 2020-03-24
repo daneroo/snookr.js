@@ -1,0 +1,29 @@
+
+
+rack2:/home/jean-guy/public_html/image
+mirrored at
+rack3:/home/daniel/media/dadSurSolo
+
+want to transport to /archive/media/phoyo/dadSurSolo
+
+Q: does rsync preseve hard links ?
+http://lists.samba.org/archive/rsync/2003-November/007789.html
+
+
+/archive/media/photo/createlink.sh
+
+Test with small set.
+
+create hard links on rack3
+/home/daniel/media/transport/md5dir/<md5>
+create symbolic links 
+   /home/daniel/media/transport/m5linkdir/fullpath ->
+   /home/daniel/media/transport/md5dir/<md5>
+
+create hardlinks on euler
+/home/daniel/media/transport/md5dir/<md5>
+
+to test broken links:
+find DIR -type l ! -exec test -r {} \; -print
+
+then rsync -n rack3:media/transport/md5dir euler:/home/daniel/media/transport/md5dir to find missing
