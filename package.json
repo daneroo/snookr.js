@@ -31,7 +31,7 @@
   "homepage": "https://github.com/daneroo/snookr.js#readme",
   "dependencies": {
     "exif": "^0.6.0",
-    "file-type": "^14.1.4",
+    "file-type": "^16.5.4",
     "flickr-sdk": "^3.9.0",
     "moment": "^2.24.0",
     "superagent": "^5.2.2"
