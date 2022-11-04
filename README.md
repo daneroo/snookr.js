@@ -36,6 +36,18 @@ Objectives:
   - Work on `Piaget-03-07/jeanguy/Pictures|Documents`
 - isIgnored / other mime-types (AVI,gif,..)
 
+```bash
+/archive/media/photo:
+Counts: {
+  total: 53351,
+  mimeJpegExif: 51551,
+  mimeJpegNoExif: 693,
+  mimeOther: 719,
+  ignored: 388,
+  reason: { '.DS_Store': 2, 'picasa.ini': 386 }
+}
+```
+
 ### Manual counts
 
 - flickr: one gif (named .jpg)

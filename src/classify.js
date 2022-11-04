@@ -26,18 +26,18 @@ async function main () {
       total: 0,
       mimeJpegExif: 0,
       mimeJpegNoExif: 0,
-      mimeOther: 0,
       ignored: 0,
-      reason: {}
+      reason: {},
+      mime: {}
     }
     const onItem = async (p) => {
       counts.total++
       if (!isIgnored(p, counts)) {
         await classifyOne(p, counts)
       }
-      if (counts.total % 10000 === 0) {
-        console.log('Progress', counts)
-      }
+      // if (counts.total % 10000 === 0) {
+      //   console.log('Progress', counts)
+      // }
     }
     await walk(dirName, onItem)
 
@@ -72,16 +72,18 @@ async function classifyOne (p, counts) {
   // let ext = path.extname(p)
   // const base = path.basename(p, ext)
   // ext = ext.slice(1) // ok even if ext===''
-  // if (!typ) {
-  //   console.log(`Unknown mime type for base:${base} ext:${ext} p:${p}`)
-  //   typ = { ext, mime: 'Unknown' } // I made that up!
-  // }
+  const mime = (typ || { mime: 'unknown' }).mime
+  if (mime === 'unknown') {
+    console.log({ p, mime })
+  }
+
+  counts.mime[mime] = (counts.mime[mime] || 0) + 1
 
   // mimeCounts[typ.mime] = (mimeCounts[typ.mime] || {})
   // // typ.ext is normalized, use actual extension: ext
   // mimeCounts[typ.mime][ext] = (mimeCounts[typ.mime][ext] || 0) + 1
 
-  if (typ && typ.mime === 'image/jpeg') {
+  if (mime === 'image/jpeg') {
     const exif = await extractExif(p)
     const hasExif = Object.keys(exif).length !== 0
     if (hasExif) {
@@ -90,8 +92,6 @@ async function classifyOne (p, counts) {
     } else {
       counts.mimeJpegNoExif++
     }
-  } else {
-    counts.mimeOther++
   }
 }
 
